@@ -28,6 +28,14 @@ html, body {
   height: 100%;
   z-index: 0;
 }
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+  color: #00ff41;
+  min-height: 100vh;
+}
 .card {
   position: relative;
   z-index: 2;
@@ -42,28 +50,9 @@ html, body {
   backdrop-filter: blur(4px);
   animation: fadeIn 1.5s ease;
 }
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Share Tech Mono', monospace;
-  color: #00ff41;
-  min-height: 100vh;
-}
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-.mask {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 0 12px #00ff41);
-  animation: pulse 3s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { filter: drop-shadow(0 0 12px #00ff41); }
-  50% { filter: drop-shadow(0 0 24px #00ff41); }
 }
 .logo {
   font-size: 38px;
@@ -139,7 +128,6 @@ body {
 <body>
 <canvas id="matrix"></canvas>
 <div class="card">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Guy_Fawkes_mask_%28white%29.svg/512px-Guy_Fawkes_mask_%28white%29.svg.png" alt="mask" class="mask">
   <div class="logo">
     <span class="glitch" data-text="fsociety">fsociety</span>
   </div>
